@@ -84,7 +84,7 @@ jobs:
   # https://circleci.com/docs/2.0/building-docker-images/
   bot_build_container:
     docker:
-      - image: docker:18.05.0-ce
+      - image: docker:20.10.12
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
