@@ -15,12 +15,12 @@ RUN apt update && \
 
 WORKDIR /var/app
 
-COPY --chown=kodiak pyproject.toml poetry.lock .
+COPY --chown=kodiak pyproject.toml poetry.lock /var/app
 
 # install deps
 RUN poetry install
 
-COPY --chown=kodiak . .
+COPY --chown=kodiak . /var/app
 
 USER kodiak
 
