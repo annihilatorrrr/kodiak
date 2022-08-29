@@ -499,9 +499,7 @@ def get_subscription_info(request: AuthedHttpRequest, team_id: str) -> JsonRespo
 def plan_id_from_period(period: Literal["month", "year"]) -> str:
     if period == "month":
         return cast(str, settings.STRIPE_PLAN_ID)
-    if period == "year":
-        return cast(str, settings.STRIPE_ANNUAL_PLAN_ID)
-    return None
+    return cast(str, settings.STRIPE_ANNUAL_PLAN_ID) if period == "year" else None
 
 
 class FetchProrationModal(pydantic.BaseModel):
@@ -760,8 +758,7 @@ def process_login_request(request: HttpRequest) -> Union[Success, Error]:
             error="OAuthServerError", error_description="Failed to fetch access token."
         )
     access_res_data = dict(parse_qsl(access_res.text))
-    access_token_error = access_res_data.get("error")
-    if access_token_error:
+    if access_token_error := access_res_data.get("error"):
         return Error(
             error=access_token_error,
             error_description=access_res_data.get("error_description", ""),

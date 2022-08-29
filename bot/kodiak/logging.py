@@ -51,9 +51,7 @@ def _get_event_and_hint(
     original_event_dict = event_dict.copy()
 
     exc_info = event_dict.pop("exc_info", sys.exc_info())
-    has_exc_info = exc_info and exc_info != (None, None, None)
-
-    if has_exc_info:
+    if has_exc_info := exc_info and exc_info != (None, None, None):
         event, hint = event_from_exception(exc_info)
     else:
         event = {}
@@ -115,7 +113,7 @@ def add_request_info_processor(
     Structlog processor for adding more information to log events that provide
     `res` with a requests Response object.
     """
-    response = event_dict.get("res", None)
+    response = event_dict.get("res")
     if isinstance(response, Response):
         event_dict["response_content"] = cast(Any, response)._content
         event_dict["response_status_code"] = response.status_code

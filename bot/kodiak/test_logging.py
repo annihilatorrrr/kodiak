@@ -45,7 +45,7 @@ def test_sentry_sent() -> None:
 def test_sentry_log(mocker: Any, level: SentryLevel) -> None:
     m_capture_event = mocker.patch("kodiak.logging.capture_event")
 
-    event_data = {"event": level + " message"}
+    event_data = {"event": f"{level} message"}
     sentry_event_data = event_data.copy()
     processor = SentryProcessor(level=getattr(logging, level.upper()))
     processor(None, level, event_data)
@@ -56,7 +56,7 @@ def test_sentry_log(mocker: Any, level: SentryLevel) -> None:
     )
 
     processor_only_errors = SentryProcessor(level=logging.ERROR)
-    event_dict = processor_only_errors(None, level, {"event": level + " message"})
+    event_dict = processor_only_errors(None, level, {"event": f"{level} message"})
 
     assert "sentry_id" not in event_dict
 
@@ -69,7 +69,7 @@ def test_sentry_log_failure(mocker: Any, level: SentryLevel) -> None:
         return_value=({"exception": mocker.sentinel.exception}, mocker.sentinel.hint),
     )
 
-    event_data = {"event": level + " message"}
+    event_data = {"event": f"{level} message"}
     sentry_event_data = event_data.copy()
     processor = SentryProcessor(level=getattr(logging, level.upper()))
     try:
@@ -92,7 +92,7 @@ def test_sentry_log_failure(mocker: Any, level: SentryLevel) -> None:
 def test_sentry_log_all_as_tags(mocker: Any, level: SentryLevel) -> None:
     m_capture_event = mocker.patch("kodiak.logging.capture_event")
 
-    event_data = {"event": level + " message"}
+    event_data = {"event": f"{level} message"}
     sentry_event_data = event_data.copy()
     processor = SentryProcessor(
         level=getattr(logging, level.upper()), tag_keys="__all__"
@@ -110,7 +110,7 @@ def test_sentry_log_all_as_tags(mocker: Any, level: SentryLevel) -> None:
     )
 
     processor_only_errors = SentryProcessor(level=logging.ERROR)
-    event_dict = processor_only_errors(None, level, {"event": level + " message"})
+    event_dict = processor_only_errors(None, level, {"event": f"{level} message"})
 
     assert "sentry_id" not in event_dict
 
@@ -119,7 +119,7 @@ def test_sentry_log_all_as_tags(mocker: Any, level: SentryLevel) -> None:
 def test_sentry_log_specific_keys_as_tags(mocker: Any, level: SentryLevel) -> None:
     m_capture_event = mocker.patch("kodiak.logging.capture_event")
 
-    event_data = {"event": level + " message", "info1": "info1", "required": True}
+    event_data = {"event": f"{level} message", "info1": "info1", "required": True}
     tag_keys = ["info1", "required", "some non existing key"]
     sentry_event_data = event_data.copy()
     processor = SentryProcessor(
@@ -140,7 +140,7 @@ def test_sentry_log_specific_keys_as_tags(mocker: Any, level: SentryLevel) -> No
     )
 
     processor_only_errors = SentryProcessor(level=logging.ERROR)
-    event_dict = processor_only_errors(None, level, {"event": level + " message"})
+    event_dict = processor_only_errors(None, level, {"event": f"{level} message"})
 
     assert "sentry_id" not in event_dict
 

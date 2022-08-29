@@ -67,7 +67,7 @@ class BaseMockFunc:
 
 class MockDequeue(BaseMockFunc):
     async def __call__(self) -> None:
-        self.log_call(dict())
+        self.log_call({})
 
 
 class MockSetStatus(BaseMockFunc):
@@ -107,7 +107,7 @@ class MockCreateComment(BaseMockFunc):
 
 class MockTriggerTestCommit(BaseMockFunc):
     async def __call__(self) -> None:
-        self.log_call(dict())
+        self.log_call({})
 
 
 class MockMerge(BaseMockFunc):
@@ -147,17 +147,17 @@ class MockQueueForMerge(BaseMockFunc):
 
 class MockUpdateBranch(BaseMockFunc):
     async def __call__(self) -> None:
-        self.log_call(dict())
+        self.log_call({})
 
 
 class MockApprovePullRequest(BaseMockFunc):
     async def __call__(self) -> None:
-        self.log_call(dict())
+        self.log_call({})
 
 
 class MockRequeue(BaseMockFunc):
     async def __call__(self) -> None:
-        self.log_call(dict())
+        self.log_call({})
 
 
 class MockPrApi:

@@ -563,7 +563,7 @@ class TokenResponse(BaseModel):
         return self.expires_at - timedelta(minutes=5) < datetime.now(timezone.utc)
 
 
-installation_cache: MutableMapping[str, Optional[TokenResponse]] = dict()
+installation_cache: MutableMapping[str, Optional[TokenResponse]] = {}
 
 # TODO(sbdchd): pass logging via TLS or async equivalent
 
@@ -693,8 +693,7 @@ def get_check_runs(*, pr: Dict[str, Any]) -> List[CheckRun]:
             check_suite_nodes = commit_node["commit"]["checkSuites"]["nodes"]
             for check_run_node in check_suite_nodes:
                 check_run_nodes = check_run_node["checkRuns"]["nodes"]
-                for check_run in check_run_nodes:
-                    check_run_dicts.append(check_run)
+                check_run_dicts.extend(iter(check_run_nodes))
     except (KeyError, TypeError):
         pass
 
@@ -888,9 +887,10 @@ query {
    }
 }
 """,
-            variables=dict(),
+            variables={},
             installation_id=self.installation_id,
         )
+
         if res is None:
             self.log.warning("failed to fetching api features")
             return None

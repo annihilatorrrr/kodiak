@@ -151,16 +151,17 @@ async def refresh_pull_requests_for_installation(
     events = []
     for repository in data["repositories"]["nodes"]:
         repo_name = repository["name"]
-        for pull_request in repository["pullRequests"]["nodes"]:
-            events.append(
-                WebhookEvent(
-                    repo_owner=login,
-                    repo_name=repo_name,
-                    target_name=pull_request["baseRef"]["name"],
-                    pull_request_number=pull_request["number"],
-                    installation_id=installation_id,
-                )
+        events.extend(
+            WebhookEvent(
+                repo_owner=login,
+                repo_name=repo_name,
+                target_name=pull_request["baseRef"]["name"],
+                pull_request_number=pull_request["number"],
+                installation_id=installation_id,
             )
+            for pull_request in repository["pullRequests"]["nodes"]
+        )
+
     for event in events:
         await redis.zadd(
             event.get_webhook_queue_name(),

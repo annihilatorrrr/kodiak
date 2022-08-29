@@ -35,9 +35,10 @@ def test_pr_get_merge_body_full() -> None:
     )
     expected = MergeBody(
         merge_method="squash",
-        commit_title=pull_request.title + f" (#{pull_request.number})",
+        commit_title=f"{pull_request.title} (#{pull_request.number})",
         commit_message=pull_request.body,
     )
+
     assert expected == actual
 
 

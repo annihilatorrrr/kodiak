@@ -39,9 +39,7 @@ def get_migration_id(filepath: str) -> Optional[str]:
     """
     filename = Path(filepath).name
     match = MIGRATION_REGEX.match(filename)
-    if match is None:
-        return None
-    return match.groups()[0]
+    return None if match is None else match.groups()[0]
 
 
 @dataclass(frozen=True)

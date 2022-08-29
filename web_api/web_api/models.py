@@ -411,17 +411,8 @@ class Account(BaseModel):
             return SeatsExceeded(allowed_user_ids=allowed_user_ids)
 
         if customer_info:
-            if customer_info.expired:
-                return SubscriptionExpired()
-            # active subscription within active user limits.
-            return None
-
-        if self.trial_expired():
-            return TrialExpired()
-
-        # the user has never signed up for a trial or subscription and has 0
-        # active users.
-        return None
+            return SubscriptionExpired() if customer_info.expired else None
+        return TrialExpired() if self.trial_expired() else None
 
     def update_customer(self, customer_id: str) -> None:
         self.stripe_customer_id = customer_id
@@ -452,8 +443,7 @@ class Account(BaseModel):
                 else None
             ),
         )
-        stripe_customer_info = self.stripe_customer_info()
-        if stripe_customer_info:
+        if stripe_customer_info := self.stripe_customer_info():
             if email is not None:
                 stripe_customer_info.customer_email = email
             if name is not None:
@@ -477,16 +467,12 @@ class Account(BaseModel):
 
         r.hset(key, b"account_id", str(self.id))
 
-        subscription_blocker = self.get_subscription_blocker()
-        if subscription_blocker:
+        if subscription_blocker := self.get_subscription_blocker():
             r.hset(key, b"subscription_blocker", subscription_blocker.kind.encode())
             r.hset(key, b"data", subscription_blocker.json())
         else:
             r.hset(key, b"subscription_blocker", b"")
             r.hset(key, b"data", b"")
-
-        # Trigger bot to reevaluate pull request mergeability.
-        # We can use this to trigger the bot to remove the paywall status message on upgrades.
 
         class RefreshPullRequestsMessage(pydantic.BaseModel):
             installation_id: str
@@ -586,10 +572,9 @@ class PullRequestActivity(BaseModel):
         Create PullRequestActivity objects from GitHubEvent information.
         """
         start_time = time.time()
-        pr_progress: Optional[
-            PullRequestActivityProgress
-        ] = PullRequestActivityProgress.objects.order_by("-min_date").first()
-        if pr_progress:
+        if pr_progress := PullRequestActivityProgress.objects.order_by(
+            "-min_date"
+        ).first():
             min_date = timezone.make_aware(
                 datetime.datetime(
                     pr_progress.min_date.year,
@@ -628,10 +613,7 @@ class PullRequestActivity(BaseModel):
             where_clause.append(
                 f"(payload -> 'installation' ->> 'id')::integer = {account.github_installation_id}"
             )
-        if where_clause:
-            where = " WHERE " + " AND ".join(where_clause)
-        else:
-            where = ""
+        where = " WHERE " + " AND ".join(where_clause) if where_clause else ""
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
@@ -846,10 +828,7 @@ class UserPullRequestActivity(BaseModel):
                 f"created_at > '{user_pull_request_activity_progress.min_date.isoformat()}'::timestamp"
             )
 
-        if where_clause:
-            where = " AND " + " AND ".join(where_clause)
-        else:
-            where = ""
+        where = " AND " + " AND ".join(where_clause) if where_clause else ""
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""

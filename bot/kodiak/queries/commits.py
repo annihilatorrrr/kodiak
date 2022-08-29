@@ -53,6 +53,4 @@ def get_commits(*, pr: Dict[str, Any]) -> List[Commit]:
         logger.exception("problem parsing commit authors")
         return []
     nodes = pull_request.commitHistory.nodes
-    if not nodes:
-        return []
-    return [node.commit for node in nodes]
+    return [node.commit for node in nodes] if nodes else []

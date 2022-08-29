@@ -11,9 +11,7 @@ class PydanticJsonEncoder(DjangoJSONEncoder):
     """
 
     def default(self, o: object) -> Any:
-        if isinstance(o, pydantic.BaseModel):
-            return o.dict()
-        return super().default(o)
+        return o.dict() if isinstance(o, pydantic.BaseModel) else super().default(o)
 
 
 class JsonResponse(django.http.JsonResponse):
