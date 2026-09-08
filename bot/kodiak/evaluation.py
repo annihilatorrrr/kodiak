@@ -310,6 +310,8 @@ class PRAPI(Protocol):
         commit_message: Optional[str],
     ) -> None: ...
 
+    async def add_to_merge_queue(self) -> None: ...
+
     async def update_ref(self, *, ref: str, sha: str) -> None: ...
 
     async def queue_for_merge(self, *, first: bool) -> Optional[int]: ...
@@ -759,6 +761,12 @@ async def mergeable(
                 markdown_content=get_markdown_for_paywall(),
             )
             return
+
+    if pull_request.isInMergeQueue:
+        log.info("pull request in merge queue")
+        await api.dequeue()
+        await set_status("🚂 in GitHub merge queue")
+        return
 
     pull_request_labels = set(pull_request.labels)
     config_automerge_labels = (
@@ -1256,6 +1264,12 @@ branch protection requirements.
     # okay to merge if we reach this point.
 
     if (config.merge.prioritize_ready_to_merge and ready_to_merge) or merging:
+        if pull_request.isMergeQueueEnabled:
+            await set_status("⛴ attempting to merge PR (adding to merge queue)")
+            await api.add_to_merge_queue()
+            await set_status("🚂 added to GitHub merge queue")
+            return
+
         merge_args = get_merge_body(config, merge_method, pull_request, commits=commits)
         await set_status("⛴ attempting to merge PR (merging)")
         try:
